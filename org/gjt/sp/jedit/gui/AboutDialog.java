@@ -87,7 +87,7 @@ public class AboutDialog extends EnhancedDialog
 	} //}}}
 
 	//{{{ AboutPanel class
-	static class AboutPanel extends JComponent
+	static class AboutPanel extends JComponent implements ScrollPositionAccepting
 	{
 		ImageIcon image;
 		Vector text;
@@ -123,7 +123,7 @@ public class AboutDialog extends EnhancedDialog
 
 			scrollPosition = -250;
 
-			thread = new AnimationThread();
+			thread = new AnimationThread(this);
 		}
 
 		public void paintComponent(Graphics g)
@@ -178,58 +178,21 @@ public class AboutDialog extends EnhancedDialog
 			thread.kill();
 		}
 
-		class AnimationThread extends Thread
-		{
-			private boolean running = true;
-			private long last;
+		@Override
+		public void incrementScroll() {
+			FontMetrics fm = getFontMetrics(getFont());
+			int max = (text.size() * fm.getHeight());
+			scrollPosition += 2;
 
-			AnimationThread()
-			{
-				super("About box animation thread");
-				setPriority(Thread.MIN_PRIORITY);
-			}
-			
-			public void kill()
-			{
-				running = false;
-			}
+			if(scrollPosition > max)
+				scrollPosition = -250;
+		}
 
-			public void run()
-			{
-				FontMetrics fm = getFontMetrics(getFont());
-				int max = (text.size() * fm.getHeight());
-
-				while (running)
-				{
-					scrollPosition += 2;
-
-					if(scrollPosition > max)
-						scrollPosition = -250;
-
-					if(last != 0)
-					{
-						long frameDelay =
-							System.currentTimeMillis()
-							- last;
-
-						try
-						{
-							Thread.sleep(
-								75
-								- frameDelay);
-						}
-						catch(Exception e)
-						{
-						}
-					}
-
-					last = System.currentTimeMillis();
-
-					repaint(getWidth() / 2 - maxWidth,
-						TOP,maxWidth * 2,
-						getHeight() - TOP - BOTTOM);
-				}
-			}
+		@Override
+		public void repaintInPlace() {
+			repaint(getWidth() / 2 - maxWidth,
+			TOP,maxWidth * 2,
+			getHeight() - TOP - BOTTOM);
 		}
 	} //}}}
 }

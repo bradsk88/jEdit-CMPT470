@@ -23,9 +23,13 @@
 package org.gjt.sp.util;
 
 import java.io.*;
+import java.sql.Time;
 import java.util.*;
+
 import javax.swing.*;
 import javax.swing.event.*;
+
+import org.joda.time.DateTime;
 
 /**
  * This class provides methods for logging events. In terms of functionality,
@@ -144,14 +148,12 @@ public class Log
 				{
 					for(int i = logLineCount; i < log.length; i++)
 					{
-						stream.write(log[i]);
-						stream.write(lineSep);
+						logLine(log[i]);
 					}
 				}
 				for(int i = 0; i < logLineCount; i++)
 				{
-					stream.write(log[i]);
-					stream.write(lineSep);
+					logLine(log[i]);
 				}
 
 				stream.flush();
@@ -165,6 +167,11 @@ public class Log
 		Log.stream = stream;
 	} //}}}
 
+	private static void logLine(String text) throws IOException {
+		stream.write(text);
+		stream.write(lineSep);
+	}
+	
 	//{{{ flushStream() method
 	/**
 	 * Flushes the log stream.
@@ -354,12 +361,12 @@ public class Log
 	//{{{ _log() method
 	private static void _log(int urgency, String source, String message)
 	{
-		String fullMessage = '[' + urgencyToString(urgency) + "] " + source
+		String fullMessage = "[" + DateTime.now().toString("dd/MM/YYYY-hh:mm:ss") + "]" + '[' + urgencyToString(urgency) + "] " + source
 			+ ": " + message;
 
 		try
 		{
-			log[logLineCount] = fullMessage;
+			log[logLineCount] =  fullMessage;
 			if(++logLineCount >= log.length)
 			{
 				wrap = true;
@@ -368,8 +375,7 @@ public class Log
 
 			if(stream != null)
 			{
-				stream.write(fullMessage);
-				stream.write(lineSep);
+				logLine(fullMessage);
 			}
 		}
 		catch(Exception e)

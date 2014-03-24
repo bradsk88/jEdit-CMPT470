@@ -20,7 +20,9 @@
 package org.gjt.sp.jedit.gui;
 
 import javax.swing.*;
+
 import java.awt.*;
+import java.util.concurrent.CountDownLatch;
 
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.util.Log;
@@ -29,8 +31,11 @@ import org.gjt.sp.util.Log;
  * The splash screen displayed on startup.
  * @version $Id: SplashScreen.java 8122 2006-11-24 11:29:49Z kpouer $
  */
-public class SplashScreen extends JComponent
+public class SplashScreen extends JComponent implements ScrollPositionAccepting
 {
+	private static final String AUTHOR_STRING = "Brad Johnson\nbaj231@mail.usask.ca";
+	private int scrollPosition;
+	
 	public SplashScreen()
 	{
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -61,7 +66,7 @@ public class SplashScreen extends JComponent
 		int width = gs[0].getDisplayMode().getWidth();
 		Dimension screen = new Dimension(width, height);
 		Dimension size = new Dimension(image.getWidth(this) + 2,
-			image.getHeight(this) + 2 + PROGRESS_HEIGHT);
+			image.getHeight(this) + 2 + PROGRESS_HEIGHT + 2 + AUTHOR_HEIGHT);
 		win.setSize(size);
 
 		win.getContentPane().add(this, BorderLayout.CENTER);
@@ -79,6 +84,27 @@ public class SplashScreen extends JComponent
 
 	public synchronized void advance()
 	{
+		
+		final CountDownLatch l = new CountDownLatch(1);
+		Thread t = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				l.countDown();
+			}
+			}
+		});
+		try {
+			l.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		logAdvanceTime(null);
 		progress++;
 		repaint();
@@ -159,6 +185,9 @@ public class SplashScreen extends JComponent
 		g.drawString(version,
 			getWidth() - fm.stringWidth(version) - 2,
 			image.getHeight(this) - fm.getDescent());
+		
+		int firstLineOffset = AUTHOR_HEIGHT - scrollPosition % AUTHOR_HEIGHT;
+		g.drawString(AUTHOR_STRING, getWidth() - fm.stringWidth(AUTHOR_STRING) - 2, firstLineOffset);
 		notify();
 	}
 
@@ -168,8 +197,22 @@ public class SplashScreen extends JComponent
 	private final Image image;
 	private int progress;
 	private static final int PROGRESS_HEIGHT = 20;
+	private static final int AUTHOR_HEIGHT = 20;
 	private static final int PROGRESS_COUNT = 28;
 	private String label;
 	private String lastLabel;
 	private long lastAdvanceTime = System.currentTimeMillis();
+
+	@Override
+	public void incrementScroll() {
+		scrollPosition += 2;
+		if (scrollPosition > AUTHOR_HEIGHT) {
+			scrollPosition = -AUTHOR_HEIGHT;
+		}
+	}
+
+	@Override
+	public void repaintInPlace() {
+		repaint();
+	}
 }
