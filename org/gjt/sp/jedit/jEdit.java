@@ -407,6 +407,9 @@ public class jEdit
 		GUIUtilities.advanceSplashProgress("init VFS Manager");
 		VFSManager.init();
 		GUIUtilities.advanceSplashProgress("init resources");
+		for (int i = 0 ; i < 10000; i++) {
+			GUIUtilities.advanceSplashProgress("spinning");
+		}
 		initResources();
 		SearchAndReplace.load();
 

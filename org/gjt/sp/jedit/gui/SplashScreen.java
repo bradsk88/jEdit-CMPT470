@@ -33,8 +33,9 @@ import org.gjt.sp.util.Log;
  */
 public class SplashScreen extends JComponent implements ScrollPositionAccepting
 {
-	private static final String AUTHOR_STRING = "Brad Johnson\nbaj231@mail.usask.ca";
+	private static final String AUTHOR_STRING = "Brad Johnson - baj231@mail.usask.ca";
 	private int scrollPosition;
+	private AnimationThread thread;
 	
 	public SplashScreen()
 	{
@@ -75,36 +76,20 @@ public class SplashScreen extends JComponent implements ScrollPositionAccepting
 			(screen.height - size.height) / 2);
 		win.validate();
 		win.setVisible(true);
+		
+		thread = new AnimationThread(this);
+		thread.start();
 	}
 
 	public void dispose()
 	{
 		win.dispose();
+		thread.kill();
 	}
 
 	public synchronized void advance()
 	{
 		
-		final CountDownLatch l = new CountDownLatch(1);
-		Thread t = new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
-				l.countDown();
-			}
-			}
-		});
-		try {
-			l.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		logAdvanceTime(null);
 		progress++;
 		repaint();
@@ -186,8 +171,10 @@ public class SplashScreen extends JComponent implements ScrollPositionAccepting
 			getWidth() - fm.stringWidth(version) - 2,
 			image.getHeight(this) - fm.getDescent());
 		
-		int firstLineOffset = AUTHOR_HEIGHT - scrollPosition % AUTHOR_HEIGHT;
-		g.drawString(AUTHOR_STRING, getWidth() - fm.stringWidth(AUTHOR_STRING) - 2, firstLineOffset);
+		int firstLineOffset = getHeight() - scrollPosition;
+		int mid = getWidth()/2;
+		int centeredHorizontally = mid - (fm.stringWidth(AUTHOR_STRING)/2);
+		g.drawString(AUTHOR_STRING, centeredHorizontally, firstLineOffset);
 		notify();
 	}
 
@@ -206,7 +193,7 @@ public class SplashScreen extends JComponent implements ScrollPositionAccepting
 	@Override
 	public void incrementScroll() {
 		scrollPosition += 2;
-		if (scrollPosition > AUTHOR_HEIGHT) {
+		if (scrollPosition >= AUTHOR_HEIGHT - 2) {
 			scrollPosition = -AUTHOR_HEIGHT;
 		}
 	}
