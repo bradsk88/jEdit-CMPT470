@@ -1363,4 +1363,16 @@
 	</CODE>
 </ACTION>
 
+<ACTION NAME="zoom-plus">
+	<CODE>
+		jEdit.newView(view);
+	</CODE>
+</ACTION>
+
+<ACTION NAME="new-minus">
+	<CODE>
+		jEdit.newView(view);
+	</CODE>
+</ACTION>
+
 </ACTIONS>

@@ -25,6 +25,7 @@ package org.gjt.sp.jedit.textarea;
 //{{{ Imports
 import javax.swing.text.*;
 import javax.swing.JComponent;
+
 import java.awt.event.MouseEvent;
 import java.awt.font.*;
 import java.awt.geom.AffineTransform;
@@ -32,15 +33,19 @@ import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
+
 import org.gjt.sp.jedit.buffer.IndentFoldHandler;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.syntax.Chunk;
 import org.gjt.sp.jedit.syntax.SyntaxStyle;
 import org.gjt.sp.jedit.syntax.Token;
+import org.gjt.sp.jedit.syntax.Chunk.ShowMarks;
 import org.gjt.sp.jedit.Debug;
-
 import org.gjt.sp.util.Log;
 //}}}
+
+
+import com.sun.xml.internal.bind.v2.TODO;
 
 /**
  * The text area painter is the component responsible for displaying the
@@ -1108,11 +1113,15 @@ public class TextAreaPainter extends JComponent implements TabExpander
 			float baseLine = y + fm.getHeight()
 				- fm.getLeading() - fm.getDescent();
 
+			//TODO: Externalize this boolean
+			
+			ShowMarks showWhitespace = ShowMarks.WHITESPACE;
+			
 			if(lineInfo.chunks != null)
 			{
 				x += Chunk.paintChunkList(lineInfo.chunks,
 					gfx,textArea.getHorizontalOffset(),
-					baseLine,!Debug.DISABLE_GLYPH_VECTOR);
+					baseLine,!Debug.DISABLE_GLYPH_VECTOR, showWhitespace);
 			}
 
 			JEditBuffer buffer = textArea.getBuffer();

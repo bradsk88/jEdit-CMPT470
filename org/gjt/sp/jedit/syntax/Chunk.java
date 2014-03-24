@@ -25,12 +25,22 @@ package org.gjt.sp.jedit.syntax;
 
 //{{{ Imports
 import javax.swing.text.*;
+
 import java.awt.font.*;
 import java.awt.geom.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.gjt.sp.jedit.Debug;
 //}}}
+
+
+import org.gjt.sp.jedit.syntax.whitespace.NormalStringDrawing;
+import org.gjt.sp.jedit.syntax.whitespace.StringDrawing;
+import org.gjt.sp.jedit.syntax.whitespace.WhiteSpaceStringDrawing;
+
+import sun.font.StandardGlyphVector;
 
 /**
  * A syntax token with extra information required for painting it
@@ -39,6 +49,9 @@ import org.gjt.sp.jedit.Debug;
  */
 public class Chunk extends Token
 {
+	private static final int TAB_WIDTH = 8;
+	private static final int SPACE_WIDTH = 1;
+
 	//{{{ paintChunkList() method
 	/**
 	 * Paints a chunk list.
@@ -52,6 +65,11 @@ public class Chunk extends Token
 	public static float paintChunkList(Chunk chunks,
 		Graphics2D gfx, float x, float y, boolean glyphVector)
 	{
+		return paintChunkList(chunks, gfx, x, y, glyphVector, ShowMarks.NONE);
+	} // }}}
+
+	public static float paintChunkList(Chunk chunks, Graphics2D gfx, float x,
+			float y, boolean glyphVector, ShowMarks marks) {
 		Rectangle clipRect = gfx.getClipBounds();
 
 		float _x = 0.0f;
@@ -75,12 +93,17 @@ public class Chunk extends Token
 					gfx.setColor(chunks.style.getForegroundColor());
 
 					if(glyphVector && chunks.gv != null)
-						gfx.drawGlyphVector(chunks.gv,x + _x,y);
-					else if(chunks.str != null)
-					{
-						gfx.drawString(chunks.str,
-							(int)(x + _x),(int)y);
+						drawGlyphs(gfx, chunks.gv, (int) (x + _x), (int) y,
+								marks);
+					else if (chunks.str != null) {
+						drawString(gfx, chunks.str, (int) (x + _x), (int) y,
+								marks);
+					} else {
+						System.err.println("Was null?");
 					}
+				}
+				if (isTabChunk(chunks) && marks == ShowMarks.WHITESPACE) {
+					drawTab(gfx, (int) (x + _x), (int) y, chunks.width);
 				}
 			}
 
@@ -90,6 +113,128 @@ public class Chunk extends Token
 
 		return _x;
 	} //}}}
+
+	private static float drawTab(Graphics2D gfx, int i, int y, float width) {
+		FontRenderContext context = gfx.getFontRenderContext();
+		GlyphVector createGlyphVector = shrinkTabToFit(gfx, "------->", width,
+				context);
+		gfx.setColor(Color.red);
+		gfx.drawGlyphVector(createGlyphVector, i, y);
+		return getTotalWidth(createGlyphVector);
+	}
+
+	private static GlyphVector shrinkTabToFit(Graphics2D gfx, String string,
+			float width2, FontRenderContext context) {
+		GlyphVector createGlyphVector = gfx.getFont().createGlyphVector(
+				context, string);
+		float totalWidth = getTotalWidth(createGlyphVector);
+		if (totalWidth > width2 + 2) {
+			return shrinkTabToFit(gfx, string.substring(1, string.length()),
+					width2, context);
+		}
+		return createGlyphVector;
+	}
+
+	private static boolean isTabChunk(Chunk chunks) {
+		// I don't think this is the best check. But it works.
+		return chunks.str == null && chunks.width >= 7;
+	}
+
+	private static void drawGlyphs(Graphics2D gfx, GlyphVector gv2, int x, int y, ShowMarks marks) {
+		if (marks != ShowMarks.WHITESPACE) {
+			gfx.drawGlyphVector(gv2, x, y);
+			return;
+		}
+		drawGlyphsWithWhitespaceMarkers(gfx, gv2, x, y); 
+	}
+
+	private static void drawGlyphsWithWhitespaceMarkers(Graphics2D gfx,
+			GlyphVector gv2, int x, int y) {
+		Font font = gv2.getFont();
+		FontRenderContext context = gv2.getFontRenderContext();
+		float useX = x;
+		for (int i = 0; i < gv2.getNumGlyphs(); i++) {
+			int glyphCode = gv2.getGlyphCode(i);
+			if (isSpaceGlyph(glyphCode)) {
+				int[] ints = { 66 };
+				useX += drawGlyphs(gfx, font, context, ints, Color.red, useX, y);
+				continue;
+			}
+			int[] ints = { glyphCode };
+			useX += drawGlyphs(gfx, font, context, ints, Color.black, useX, y);
+			continue;
+		}
+	}
+
+	private static boolean isSpaceGlyph(int glyphCode) {
+		return glyphCode == 3;
+	}
+
+	private static float drawGlyphs(Graphics2D gfx, Font font,
+			FontRenderContext context, int[] ints, Color red, float x, float y) {
+		gfx.setColor(red);
+		StandardGlyphVector newGV = new StandardGlyphVector(font, ints, context);
+		gfx.drawGlyphVector(newGV, x, y);
+		return getTotalWidth(newGV);
+	}
+
+	private static float getTotalWidth(GlyphVector createGlyphVector) {
+		float answer = 0;
+		for (int i = 0; i < createGlyphVector.getNumGlyphs(); i++) {
+			GlyphMetrics metrics = createGlyphVector.getGlyphMetrics(i);
+			answer += metrics.getBounds2D().getWidth();
+			answer += metrics.getLSB();
+			answer += metrics.getRSB();
+		}
+		return answer;
+	}
+
+	private static void drawString(Graphics2D gfx, String str2, int x, int y, ShowMarks marks) {
+		if (marks != ShowMarks.WHITESPACE) {
+			gfx.drawString(str2, x, y); 
+			return;
+		}
+		
+		Collection<StringDrawing> stringComponents = getComponents(x, y,
+				str2); 
+		for (StringDrawing i : stringComponents) {
+			gfx.setColor(i.getColor());
+			gfx.drawString(i.getStringRep(), i.getX(), i.getY());
+		}
+	}
+
+	private static Collection<StringDrawing> getComponents(int xOffsetIn,
+			int yOffsetIn, String str2) {
+
+		int xOffset = xOffsetIn;
+		int yOffset = yOffsetIn;
+
+		Collection<StringDrawing> collection = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		for (char i : str2.toCharArray()) {
+			if (i == '\t' || i == ' ') {
+				if (sb.length() > 0) {
+					collection.add(new NormalStringDrawing(xOffset, yOffset, sb
+							.toString()));
+					xOffset += sb.length();
+					sb.setLength(0);
+				}
+			}
+
+			if (i == '\t') {
+				collection.add(WhiteSpaceStringDrawing.tab(xOffset, yOffset));
+				xOffset += TAB_WIDTH;
+				continue;
+			}
+			if (i == ' ') {
+				collection.add(WhiteSpaceStringDrawing.space(xOffset, yOffset));
+				xOffset += SPACE_WIDTH;
+				continue;
+			}
+			sb.append(i);
+		}
+		return collection;
+	}
 
 	//{{{ paintChunkBackgrounds() method
 	/**
