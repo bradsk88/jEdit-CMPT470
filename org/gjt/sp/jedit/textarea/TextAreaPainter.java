@@ -23,29 +23,37 @@
 package org.gjt.sp.jedit.textarea;
 
 //{{{ Imports
-import javax.swing.text.*;
-import javax.swing.JComponent;
-
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
-import java.awt.font.*;
+import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
-import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
+import javax.swing.JComponent;
+import javax.swing.text.TabExpander;
+
+import org.gjt.sp.jedit.Debug;
 import org.gjt.sp.jedit.buffer.IndentFoldHandler;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.syntax.Chunk;
+import org.gjt.sp.jedit.syntax.ShowMarks;
 import org.gjt.sp.jedit.syntax.SyntaxStyle;
 import org.gjt.sp.jedit.syntax.Token;
-import org.gjt.sp.jedit.syntax.Chunk.ShowMarks;
-import org.gjt.sp.jedit.Debug;
 import org.gjt.sp.util.Log;
 //}}}
-
-
-import com.sun.xml.internal.bind.v2.TODO;
 
 /**
  * The text area painter is the component responsible for displaying the
