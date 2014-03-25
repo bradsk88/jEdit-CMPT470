@@ -89,7 +89,6 @@ public class SplashScreen extends JComponent implements ScrollPositionAccepting
 
 	public synchronized void advance()
 	{
-		
 		logAdvanceTime(null);
 		progress++;
 		repaint();

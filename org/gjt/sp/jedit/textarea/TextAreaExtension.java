@@ -25,16 +25,13 @@ package org.gjt.sp.jedit.textarea;
 import java.awt.Graphics2D;
 
 /**
- * Subclasses of this class can perform custom painting and tool tip
- * handling in the text area and gutter.
- *
+ * Subclasses of this class can perform custom painting and tool tip handling in
+ * the text area and gutter.
  * @see TextAreaPainter#addExtension(TextAreaExtension)
  * @see TextAreaPainter#removeExtension(TextAreaExtension)
  * @see Gutter#addExtension(TextAreaExtension)
  * @see Gutter#removeExtension(TextAreaExtension)
- *
  * @since jEdit 4.0pre4
- *
  * @author Slava Pestov
  * @version $Id: TextAreaExtension.java 5004 2004-03-28 00:07:27Z spestov $
  */
@@ -48,8 +45,8 @@ public abstract class TextAreaExtension
 	 * @param gfx A graphics context
 	 * @param firstLine The first screen line
 	 * @param lastLine The last screen line
-	 * @param physicalLines The list of physical line numbers. Entries are
-	 * -1 if the screen line is out of range.
+	 * @param physicalLines The list of physical line numbers. Entries are -1 if
+	 *            the screen line is out of range.
 	 * @param start An array of screen line start offsets.
 	 * @param end An array of screen line end offsets
 	 * @param y The y co-ordinate
@@ -57,18 +54,18 @@ public abstract class TextAreaExtension
 	 * @since jEdit 4.2pre2
 	 */
 	public void paintScreenLineRange(Graphics2D gfx, int firstLine,
-		int lastLine, int[] physicalLines, int[] start, int[] end,
-		int y, int lineHeight)
+			int lastLine, int[] physicalLines, int[] start, int[] end,
+			int y, int lineHeight)
 	{
-		for(int i = 0; i < physicalLines.length; i++)
+		for (int i = 0; i < physicalLines.length; i++)
 		{
 			int screenLine = i + firstLine;
 			if(physicalLines[i] == -1)
-				paintInvalidLine(gfx,screenLine,y);
+				paintInvalidLine(gfx, screenLine, y);
 			else
 			{
-				paintValidLine(gfx,screenLine,physicalLines[i],
-					start[i],end[i],y);
+				paintValidLine(gfx, screenLine, physicalLines[i],
+						start[i], end[i], y);
 			}
 
 			y += lineHeight;
@@ -77,47 +74,44 @@ public abstract class TextAreaExtension
 
 	//{{{ paintValidLine() method
 	/**
-	 * Called by the text area when the extension is to paint a
-	 * screen line which has an associated physical line number in
-	 * the buffer. Note that since one physical line may consist of
-	 * several screen lines due to soft wrap, the start and end
-	 * offsets of the screen line are passed in as well.
-	 *
+	 * Called by the text area when the extension is to paint a screen line
+	 * which has an associated physical line number in the buffer. Note that
+	 * since one physical line may consist of several screen lines due to soft
+	 * wrap, the start and end offsets of the screen line are passed in as well.
 	 * @param gfx The graphics context
 	 * @param screenLine The screen line number
 	 * @param physicalLine The physical line number
-	 * @param start The offset where the screen line begins, from
-	 * the start of the buffer
-	 * @param end The offset where the screen line ends, from the
-	 * start of the buffer
-	 * @param y The y co-ordinate of the top of the line's
-	 * bounding box
+	 * @param start The offset where the screen line begins, from the start of
+	 *            the buffer
+	 * @param end The offset where the screen line ends, from the start of the
+	 *            buffer
+	 * @param y The y co-ordinate of the top of the line's bounding box
 	 * @since jEdit 4.0pre4
 	 */
 	public void paintValidLine(Graphics2D gfx, int screenLine,
-		int physicalLine, int start, int end, int y) {} //}}}
+			int physicalLine, int start, int end, int y)
+	{
+	} //}}}
 
 	//{{{ paintInvalidLine() method
 	/**
-	 * Called by the text area when the extension is to paint a
-	 * screen line which is not part of the buffer. This can happen
-	 * if the buffer is shorter than the height of the text area,
-	 * for example.
-	 *
+	 * Called by the text area when the extension is to paint a screen line
+	 * which is not part of the buffer. This can happen if the buffer is shorter
+	 * than the height of the text area, for example.
 	 * @param gfx The graphics context
 	 * @param screenLine The screen line number
-	 * @param y The y co-ordinate of the top of the line's
-	 * bounding box
+	 * @param y The y co-ordinate of the top of the line's bounding box
 	 * @since jEdit 4.0pre4
 	 */
 	public void paintInvalidLine(Graphics2D gfx, int screenLine,
-		int y) {} //}}}
+			int y)
+	{
+	} //}}}
 
 	//{{{ getToolTipText() method
 	/**
-	 * Called by the text area when the mouse hovers over the
-	 * location specified in the mouse event.
-	 *
+	 * Called by the text area when the mouse hovers over the location specified
+	 * in the mouse event.
 	 * @param x The x co-ordinate
 	 * @param y The y co-ordinate
 	 * @since jEdit 4.0pre4
