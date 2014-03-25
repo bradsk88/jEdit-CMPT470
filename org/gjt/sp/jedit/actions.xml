@@ -369,6 +369,12 @@
 	</CODE>
 </ACTION>
 
+<ACTION NAME="hide-whitespace">
+    <CODE>
+        textArea.disableWhitespace();
+    </CODE>
+</ACTION>
+
 <ACTION NAME="home" NO_RECORD="TRUE">
 	<CODE>
 		textArea.smartHome(false);
@@ -1192,6 +1198,12 @@
 	<CODE>
 		editPane.showBufferSwitcher();
 	</CODE>
+</ACTION>
+
+<ACTION NAME="show-whitespace">
+    <CODE>
+        textArea.enableWhitespace();
+    </CODE>
 </ACTION>
 
 <ACTION NAME="spaces-to-tabs">

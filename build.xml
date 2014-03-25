@@ -125,7 +125,7 @@
 			 basedir="${classes.dir}/core"
 			 compress="false"
 			 manifest="org/gjt/sp/jedit/jedit.manifest"
-			 duplicate="fail"
+			 duplicate="preserve"
 			 index="true">
 			<fileset dir=".">
 				<include name="bsh/commands/*.bsh" />

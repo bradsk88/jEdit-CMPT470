@@ -469,7 +469,10 @@ next-fold.label=Go to $Next Fold
 #}}}
 
 #{{{ View menu
-view=new-view \
+view=show-whitespace \
+     hide-whitespace \
+     - \
+     new-view \
      new-plain-view \
      close-view \
      - \
@@ -487,6 +490,8 @@ view=new-view \
      %splitting \
      %docking
 view.label=$View
+show-whitespace.label=Show Non-Printing Characters
+hide-whitespace.label=Hide Non-Printing Characters
 new-view.label=New $View
 new-plain-view.label=Ne$w Plain View
 close-view.label=$Close View
