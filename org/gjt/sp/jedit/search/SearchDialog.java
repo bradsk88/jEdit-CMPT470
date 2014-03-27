@@ -297,7 +297,7 @@ public class SearchDialog extends EnhancedDialog implements EBComponent
 
 	// buttons
 	private JButton findBtn, /* replaceBtn, */ replaceAndFindBtn, replaceAllBtn,
-		closeBtn;
+			closeBtn, markAllBtn;
 
 	private boolean saving;
 	//}}}
@@ -673,6 +673,10 @@ public class SearchDialog extends EnhancedDialog implements EBComponent
 		grid.add(replaceAllBtn);
 		replaceAllBtn.addActionListener(actionHandler);
 
+		markAllBtn = new JButton(jEdit.getProperty("search.markAllBtn"));
+		markAllBtn.addActionListener(actionHandler);
+		grid.add(markAllBtn);
+		
 		closeBtn = new JButton(jEdit.getProperty("common.close"));
 		grid.add(closeBtn);
 		closeBtn.addActionListener(actionHandler);
@@ -1070,6 +1074,11 @@ public class SearchDialog extends EnhancedDialog implements EBComponent
 				}
 
 				setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			}else if(source == markAllBtn)
+			{
+				if(!save(false))
+					return;
+				SearchAndReplace.markAll(view);
 			}
 		}
 	} //}}}

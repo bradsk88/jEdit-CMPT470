@@ -32,7 +32,9 @@ import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.gui.TextAreaDialog;
 import org.gjt.sp.jedit.io.VFSManager;
 import org.gjt.sp.jedit.msg.SearchSettingsChanged;
+import org.gjt.sp.jedit.search.SearchMatcher.Match;
 import org.gjt.sp.jedit.textarea.*;
+import org.gjt.sp.jedit.textarea.Selection.Range;
 import org.gjt.sp.util.SegmentCharSequence;
 import org.gjt.sp.util.Log;
 //}}}
@@ -423,6 +425,11 @@ public class SearchAndReplace
 	 */
 	public static boolean find(View view)
 	{
+		return find(view, OnFind.DO_NOTHING);
+	}
+
+	private static boolean find(View view, OnFind onFind)
+	{
 		// component that will parent any dialog boxes
 		Component comp = SearchDialog.getSearchDialog(view);
 		if(comp == null || !comp.isShowing())
@@ -508,7 +515,7 @@ loop:			for(;;)
 							_search = false;
 					}
 
-					if(_search && find(view,buffer,start,repeat,_reverse))
+					if(_search && find(view,buffer,start,repeat,_reverse,onFind))
 						return true;
 				}
 
@@ -607,6 +614,11 @@ loop:			for(;;)
 	public static boolean find(View view, Buffer buffer, int start,
 		boolean firstTime, boolean reverse) throws Exception
 	{
+		return find(view, buffer, start, firstTime, reverse, OnFind.DO_NOTHING);
+	}
+
+	private static boolean find(View view, Buffer buffer, int start, boolean firstTime, boolean reverse, OnFind onFind) throws Exception
+	{
 		SearchMatcher matcher = getSearchMatcher();
 		if(matcher == null)
 		{
@@ -634,30 +646,48 @@ loop:			for(;;)
 			view.setBuffer(buffer);
 			JEditTextArea textArea = view.getTextArea();
 
+			Selection.Range selection = new Selection.Range(
+					start + match.start,
+					start + match.end);
 			if(reverse)
 			{
-				textArea.setSelection(new Selection.Range(
+				selection = new Selection.Range(
 					start - match.end,
-					start - match.start));
+					start - match.start);
+				textArea.setSelection(selection);
 				// make sure end of match is visible
 				textArea.scrollTo(start - match.start,false);
 				textArea.moveCaretPosition(start - match.end);
 			}
 			else
 			{
-				textArea.setSelection(new Selection.Range(
-					start + match.start,
-					start + match.end));
+				textArea.setSelection(selection);
 				textArea.moveCaretPosition(start + match.end);
 				// make sure start of match is visible
 				textArea.scrollTo(start + match.start,false);
 			}
+			onFind.found(match, buffer, textArea.getCaretPosition());
 
 			return true;
 		}
 		else
 			return false;
 	} //}}}
+
+	public static boolean markAll(final View view)
+	{
+		setAutoWrapAround(true);
+		view.getTextArea().setSelection(new Selection[] {});
+		view.getTextArea().setCaretPosition(0);
+		return find(view, new OnFind()
+		{
+			public void found(Match match, Buffer buffer, int caratPosition) throws Exception
+			{
+				buffer.addMarker('\0', caratPosition);
+				find(view, buffer, caratPosition, false, false, this);
+			}
+		});
+	}
 
 	//{{{ replace() method
 	/**

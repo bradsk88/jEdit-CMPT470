@@ -1302,6 +1302,7 @@ search.replaceAndFindBtn=Replace & Find
 search.replaceAndFindBtn.mnemonic=r
 search.replaceAllBtn=Replace All
 search.replaceAllBtn.mnemonic=a
+search.markAllBtn=Mark All
 
 # Beep when searching automatically wraps?
 search.beepOnSearchAutoWrap=false
